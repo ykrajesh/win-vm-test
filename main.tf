@@ -2,7 +2,7 @@ resource "azurerm_resource_group" "rg" {
   name     = var.resource_group_name
   location = var.location
 }
-
+/*
 resource "azurerm_virtual_network" "vnet" {
   name                = "${var.vm_name}-vnet"
   address_space       = ["10.0.0.0/16"]
@@ -60,3 +60,4 @@ resource "azurerm_windows_virtual_machine" "vm" {
     version   = "latest"
   }
 }
+*/
