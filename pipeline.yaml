@@ -1,0 +1,73 @@
+trigger:
+- master
+
+resources:
+  repositories:
+  - repository: githubRepo
+    type: github
+    name: ykrajesh/win-vm-test           # Replace with your GitHub org/repo
+    ref: refs/heads/main                    # Replace with your GitHub branch if different
+    endpoint: "GitHub connection 1"        # Ensure the correct GitHub service connection name
+
+variables:
+  artifactName: 'terraform-files'
+  terraformWorkingDirectory: '$(Build.SourcesDirectory)/$(artifactName)'
+  backendServiceArm: 'fantoos-sub'     # Replace with your Azure service connection name
+  backendResourceGroup: 'tf-storage'
+  backendStorageAccount: 'tfstorageaccount121'
+  backendContainer: 'tfstorage'
+  backendKey: 'windows-vm.tfstate'
+
+pool:
+  vmImage: 'windows-latest'
+
+stages:
+  - stage: Build
+    displayName: "Copy files from GitHub and Publish Artifact"
+    jobs:
+      - job: CopyAndPublish
+        displayName: "Copy Terraform Files and Publish Artifact"
+        steps:
+          - checkout: githubRepo
+
+          - task: CopyFiles@2
+            displayName: "Copy Files"
+            inputs:
+              SourceFolder: '$(Build.SourcesDirectory)'
+              Contents: '**'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Artifact"
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+              ArtifactName: '$(artifactName)'
+
+  - stage: Terraform
+    displayName: "Terraform Stage"
+    dependsOn: Build
+    jobs:
+      - job: RunTerraform
+        displayName: "Run Terraform Init"
+        steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              artifactName: '$(artifactName)'
+              downloadPath: '$(Build.SourcesDirectory)'
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: 'latest'
+
+          - task: TerraformTaskV4@4
+            displayName: "Terraform Init"
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              workingDirectory: '$(terraformWorkingDirectory)'
+              backendServiceArm: '$(backendServiceArm)'
+              backendAzureRmResourceGroupName: '$(backendResourceGroup)'
+              backendAzureRmStorageAccountName: '$(backendStorageAccount)'
+              backendAzureRmContainerName: '$(backendContainer)'
+              backendAzureRmKey: '$(backendKey)'
