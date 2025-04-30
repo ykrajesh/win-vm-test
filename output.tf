@@ -1,4 +1,5 @@
-output "vm_public_ip" {
+/*output "vm_public_ip" {
   description = "The public IP address of the Windows VM"
   value       = azurerm_public_ip.public_ip.ip_address
 }
+*/
