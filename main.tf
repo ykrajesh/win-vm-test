@@ -2,6 +2,16 @@ resource "azurerm_resource_group" "rg" {
   name     = var.resource_group_name
   location = var.location
 }
+
+terraform {
+  backend "azurerm" {
+    resource_group_name  = "tf-storage"
+    storage_account_name = "tfstorageaccount121"
+    container_name       = "tfstorage"
+    key                  = "vmifra.tfstate"
+  }
+}
+
 /*
 resource "azurerm_virtual_network" "vnet" {
   name                = "${var.vm_name}-vnet"
