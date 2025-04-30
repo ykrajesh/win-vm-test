@@ -17,7 +17,7 @@ override.tf.json
 # Sensitive variable files (optional, like terraform.tfvars)
 #terraform.tfvars
 #*.auto.tfvars
-
+.terraform.lock.hcl
 # CLI configuration files
 .terraformrc
 terraform.rc
